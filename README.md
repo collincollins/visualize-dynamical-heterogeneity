@@ -18,33 +18,34 @@ This project provides an interactive, web-based tool for visualizing **Dynamical
 
 The simulation uses a simplified **3D grid-based cellular automaton** model, not computationally expensive methods like Molecular Dynamics.
 
-*   **Representation:** A cubic grid (`gridSize` x `gridSize` x `gridSize`). Each site \((i,j,k)\) represents a "particle".
-*   **State:** Each particle has a continuous mobility state \( M_{i,j,k}(t) \) (approx. 0=slow to 1=fast).
+*   **Representation:** A cubic grid (`gridSize` x `gridSize` x `gridSize`). Each site $(i,j,k)$ represents a "particle".
+*   **State:** Each particle has a continuous mobility state $M_{i,j,k}(t)$ (approx. 0=slow to 1=fast).
 *   **Boundaries:** Periodic boundary conditions (PBC).
 *   **Initialization:** Random initial mobilities; slight random positional displacements for visual amorphousness.
 
 ### Mathematical Model
 
-The mobility \( M_{i,j,k}(t+1) \) is updated based on its current state and its neighbors' average state:
+The mobility $M_{i,j,k}(t+1)$ is updated based on its current state and its neighbors' average state:
 
-1.  **Neighbor Average:** Calculate \( \bar{M}_{\text{neighbors}}(t) \) of the 6 nearest neighbors (using PBC).
-    $$
-    \bar{M}_{\text{neighbors}}(t) = \frac{1}{6} \sum_{\text{neighbors } n} M_{n}(t)
-    $$
-2.  **Update Rule:** New mobility \( M' \) is a weighted average plus noise:
-    $$
-    M'_{i,j,k}(t+1) = (1 - C) M_{i,j,k}(t) + C \bar{M}_{\text{neighbors}}(t) + \n(t)
-    $$
-    *   \( C \): `correlationStrength` (neighbor influence).
-    *   \( \n(t) \): Uniform noise in \( [-N, N] \), where \(N\) is `noiseLevel`.
-3.  **Clamping:** Result \( M' \) is clamped strictly within \( (\epsilon, 1 - \epsilon) \) (with \( \epsilon = 10^{-6} \)).
-    $$
-    M_{i,j,k}(t+1) = \max(\epsilon, \min(1 - \epsilon, M'_{i,j,k}(t+1)))
-    $$
-4.  **Temperature Influence:** The "Temperature" slider \(T\) controls \(C\) and \(N\):
-    *   `correlationStrength` \(C = 0.95 / (1 + T \times 2.5) + 0.04\) (Decreases with \(T\))
-    *   `noiseLevel` \(N = 0.001 + T \times 0.04\) (Increases with \(T\))
-    Lower \(T\) implies high correlation and low noise (promoting clusters); higher \(T\) implies low correlation and high noise (more homogeneous/rapid fluctuations).
+1.  **Neighbor Average:** Calculate $\bar{M}_{neighbors}(t)$ of the 6 nearest neighbors (using PBC).
+
+    ![Neighbor Average equation](https://latex.codecogs.com/png.latex?\color{white}\bar{M}_{neighbors}(t)=\frac{1}{6}\sum_{n}M_{n}(t))
+
+2.  **Update Rule:** New mobility $M'$ is a weighted average plus noise:
+
+    ![Update Rule equation](https://latex.codecogs.com/png.latex?\color{white}M'_{i,j,k}(t+1)=(1-C)M_{i,j,k}(t)+C\bar{M}_{neighbors}(t)+N(t))
+
+    *   $C$: `correlationStrength` (neighbor influence).
+    *   $N(t)$: Uniform noise in $[-N, N]$, where $N$ is `noiseLevel`.
+
+3.  **Clamping:** Result $M'$ is clamped strictly within $(\epsilon, 1 - \epsilon)$ (with $\epsilon = 10^{-6}$ ).
+
+    ![Clamping equation](https://latex.codecogs.com/png.latex?\color{white}M_{i,j,k}(t+1)=\max(\epsilon,\min(1-\epsilon,M'_{i,j,k}(t+1))))
+
+4.  **Temperature Influence:** The "Temperature" slider $T$ controls $C$ and $N$:
+    *   `correlationStrength` $C = 0.95 / (1 + T \times 2.5) + 0.04$ (Decreases with $T$)
+    *   `noiseLevel` $N = 0.001 + T \times 0.04$ (Increases with $T$)
+    Lower $T$ implies high correlation and low noise (promoting clusters); higher $T$ implies low correlation and high noise (more homogeneous/rapid fluctuations).
 
 ## Visualization
 
@@ -55,7 +56,7 @@ The mobility \( M_{i,j,k}(t+1) \) is updated based on its current state and its 
 
 ## Controls
 
-*   **Temp Slider:** Adjusts \(T\), influencing \(C\) and \(N\).
+*   **Temp Slider:** Adjusts $T$, influencing $C$ and $N$.
 *   **Sim FPS Input:** Target simulation steps per second.
 *   **Pause/Play Button:** Toggles simulation steps.
 *   **Reset Button:** Re-initializes mobilities and visuals.
@@ -69,7 +70,7 @@ This is a **visualization tool**, not a physically accurate simulation.
 *   **Simplified Model:** A grid-based cellular automaton, not particle dynamics based on physical forces.
 *   **Scalar State:** Mobility is a single scalar, ignoring real system complexities (position, velocity, interactions).
 *   **Ad-hoc Dynamics:** The update rule is chosen phenomenologically to produce heterogeneity.
-*   **"Temperature" Mapping:** The slider directly controls model parameters \(C\) and \(N\), not a thermodynamic temperature.
+*   **"Temperature" Mapping:** The slider directly controls model parameters $C$ and $N$, not a thermodynamic temperature.
 *   **Grid Structure:** Underlying topology is a fixed grid, despite visual amorphousness.
 *   **Discrete Time:** Simulation uses discrete time steps.
 
