@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive 3D visualization of dynamical heterogeneity.">
+    <link rel="icon" type="image/png" href="/favicons/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+    <link rel="shortcut icon" href="/favicons/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Dynamical Heterogeneity" />
+    <link rel="manifest" href="/favicons/site.webmanifest" />
     <title>Dynamical Heterogeneity Visualization</title>
     <style>
         /* --- light mode neo-brutalist styling --- */
@@ -103,7 +110,8 @@
         input[type="number"] {
             width: 55px; text-align: right; background-color: var(--input-bg); color: var(--text-color);
             border: var(--container-border-width) solid var(--border-color); border-radius: 0; padding: 4px;
-            font-family: monospace; font-size: 0.9em;
+            font-family: monospace;
+            font-size: 1em; /* Set to 1em (>=16px) to prevent mobile zoom */
         }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
@@ -453,10 +461,12 @@
             }
             try {
                 const boxSize = gridSize * spacing;
-                camera.position.z = boxSize * 1.4;
-                camera.position.y = boxSize * 0.6;
+                const yShift = -boxSize * 0.19;
 
-                controls.target.set(0, -boxSize * 0.1, 0);
+                camera.position.z = boxSize * 1.3;
+                camera.position.y = boxSize * 0.0;
+
+                controls.target.set(0, yShift, 0);
 
                 controls.update();
                 camera.lookAt(controls.target);
@@ -481,7 +491,9 @@
 
                 console.log("init: initializing grids...");
                 mobilityGrid = new Array(gridSize); nextMobilityGrid = new Array(gridSize);
-                const boxSize = gridSize * spacing; const offset = -boxSize / 2 + spacing / 2;
+                const boxSize = gridSize * spacing;
+                const yShift = -boxSize * 0.15;
+                const offset = -boxSize / 2 + spacing / 2;
                 for (let i = 0; i < gridSize; i++) {
                     mobilityGrid[i] = new Array(gridSize); nextMobilityGrid[i] = new Array(gridSize);
                     for (let j = 0; j < gridSize; j++) {
@@ -499,7 +511,7 @@
                             if (!lowDetailGeometry) throw new Error("lowDetailGeometry is not defined");
                             const mesh = new THREE.Mesh(lowDetailGeometry, material);
                             const randomDisplacement = () => (Math.random() - 0.5) * 2 * amorphousDisplacementFactor;
-                            mesh.position.set( offset + i * spacing + randomDisplacement(), offset + j * spacing + randomDisplacement(), offset + k * spacing + randomDisplacement() );
+                            mesh.position.set( offset + i * spacing + randomDisplacement(), offset + j * spacing + randomDisplacement() + yShift, offset + k * spacing + randomDisplacement() );
                             mesh.scale.set(scaleNormal, scaleNormal, scaleNormal);
                             mesh.visible = true;
                             if (scene) scene.add(mesh); else throw new Error("scene not available");
