@@ -29,7 +29,6 @@
             flex-direction: column;
             align-items: center;
             height: 100vh;
-            overflow: hidden;
             line-height: 1.4;
         }
 
@@ -50,7 +49,7 @@
             height: 85vh;
             margin-top: 5px;
             flex-grow: 1;
-            height: 100%;
+            height: 90%;
         }
 
         #container {
@@ -260,6 +259,7 @@
                 max-width: 500px;
                 height: auto;
                 margin-top: 0;
+                gap: 15px;
             }
 
             #main-container {
@@ -293,7 +293,7 @@
             <div id="temp-control">
                 <label for="tempSlider">temp:</label>
                 <input type="range" id="tempSlider" min="0.01" max="2.0" step="0.01" value="2.0">
-                <span id="tempValue">2.00</span>
+                <span id="tempValue" style="margin-left: 5px;">2.00</span>
             </div>
 
             <div id="middle-controls-wrapper">
@@ -307,7 +307,7 @@
                 </div>
 
                 <div id="input-stack">
-                    <div class="input-group">
+                    <div class="input-group" style="margin-left: 5px;">
                         <label for="fpsInput">fps:</label>
                         <input type="number" id="fpsInput" min="1" max="60" value="20">
                     </div>
@@ -319,7 +319,7 @@
 
             </div>
 
-            <div id="particle-count-box">
+            <div id="particle-count-box" style="margin-bottom: -10px; margin-top: -5px;">
                 <span id="particleCountDisplay">particles: n/a</span>
             </div>
         </div>
