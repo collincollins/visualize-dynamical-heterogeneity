@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamical Heterogeneity Visualization</title>
+    <style>
+        /* --- light mode neo-brutalist styling --- */
+        :root {
+            --background-color: #f0f0f0; /* off-white */
+            --text-color: #1a1a1a; /* dark text */
+            --border-color: #1a1a1a; /* dark borders */
+            --accent-color: #0055ff; /* electric blue */
+            --controls-bg: #e0e0e0; /* light grey */
+            --input-bg: #ffffff; /* white */
+            --button-text: #ffffff; /* white text on accent */
+            --viewport-bg: #ffffff; /* white viewport background */
+            --container-border-width: 2px; /* thicker border */
+            --container-border: var(--container-border-width) solid var(--border-color);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        h1 {
+            margin: 10px 0 5px 0; font-size: 1.8em; font-weight: bold;
+            text-align: center; color: var(--border-color); letter-spacing: 1px;
+        }
+
+        #info {
+            margin-top: 0px; font-size: 0.85em; color: #555;
+            text-align: center; max-width: 700px; margin-bottom: 10px;
+        }
+
+        #main-container {
+            display: flex;
+            justify-content: center;
+            width: 95vw;
+            height: 85vh;
+            margin-top: 5px;
+            flex-grow: 1;
+            height: 100%;
+        }
+
+        #container {
+            width: 100%;
+            max-width: 1000px;
+            height: 100%;
+            border: var(--container-border);
+            position: relative;
+            background-color: var(--viewport-bg);
+            border-radius: 0;
+        }
+
+        canvas { display: block; width: auto !important; height: 100% !important; border-radius: 0; }
+
+        #controls {
+            padding: 20px 20px; background-color: var(--controls-bg);
+            border: var(--container-border); border-radius: 0; margin-top: 5px;
+            display: flex; flex-direction: column; align-items: center;
+            width: 95%; max-width: 250px;
+            gap: 20px;
+            display: flex;
+            flex-shrink: 0;
+            justify-content: center;
+        }
+
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%; margin: 5px 0; gap: 20px;
+        }
+
+        label {
+            font-weight: bold; min-width: fit-content; text-align: right;
+            font-size: 0.8em; color: #333; margin-right: 0;
+        }
+
+        input[type="range"] {
+            flex-grow: 1; cursor: pointer; min-width: 120px; height: 6px;
+            background: #ccc; border: var(--container-border-width) solid var(--border-color); border-radius: 0; padding: 0;
+            appearance: none; -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 10px; height: 18px; background: var(--accent-color); cursor: pointer; border-radius: 0; border: var(--container-border-width) solid var(--border-color);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 10px; height: 18px; background: var(--accent-color); cursor: pointer; border-radius: 0; border: var(--container-border-width) solid var(--border-color);
+        }
+
+        input[type="number"] {
+            width: 55px; text-align: right; background-color: var(--input-bg); color: var(--text-color);
+            border: var(--container-border-width) solid var(--border-color); border-radius: 0; padding: 4px;
+            font-family: monospace; font-size: 0.9em;
+        }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        #tempValue, #fpsValue {
+            font-weight: bold; color: var(--accent-color); min-width: 40px; text-align: left;
+            font-size: 0.9em; font-family: monospace;
+        }
+
+        button {
+            padding: 6px 12px; cursor: pointer; background-color: var(--accent-color); color: var(--button-text);
+            border: var(--container-border-width) solid var(--border-color); border-radius: 0; font-size: 0.8em; font-weight: bold;
+            transition: background-color 0.1s, color 0.1s;
+        }
+        button:hover {
+            background-color: var(--background-color); color: var(--accent-color); border-color: var(--accent-color);
+        }
+        #pauseButton {
+            background-color: #e08080;
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+        #pauseButton:hover {
+            background-color: var(--background-color);
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+        #pauseButton.paused {
+            background-color: #80c080;
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+        #pauseButton.paused:hover {
+            background-color: var(--background-color);
+            color: #2ecc71;
+            border-color: #2ecc71;
+        }
+        button.active {
+             background-color: #333;
+             color: #fff;
+             border-color: #000;
+        }
+         button.active:hover {
+             background-color: #555;
+             border-color: #000;
+         }
+
+        #modeStatus { font-size: 0.8em; color: #555; flex-basis: 100%; text-align: center; margin-top: 4px; }
+        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5em; color: var(--text-color); background-color: rgba(240,240,240,0.8); padding: 20px; border-radius: 0; z-index: 100; display: none; border: var(--container-border); }
+        #errorDisplay { color: red; margin-top: 5px; font-weight: bold; text-align: center; display: none; background-color: #fdd; border: 2px solid red; padding: 5px; border-radius: 0; }
+
+        #input-column {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: flex-start;
+        }
+        #input-column > div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        #particle-count-box {
+            border: var(--container-border-width) solid var(--border-color);
+            padding: 5px 10px;
+            margin-top: 8px;
+            background-color: var(--input-bg);
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: bold;
+            width: fit-content;
+            align-self: center;
+        }
+
+        #temp-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        #left-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #button-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #content-wrapper {
+            display: flex;
+            flex-direction: row;
+            width: 98%;
+            height: 80vh;
+            max-width: 1600px;
+            gap: 15px;
+            align-items: flex-start;
+            margin-top: 10px;
+        }
+
+        #input-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+            width: fit-content;
+        }
+
+        #pause-reset-buttons {
+             display: flex;
+             gap: 8px;
+        }
+
+        #temp-control {
+             display: flex;
+             align-items: center;
+             gap: 5px;
+             width: 100%;
+        }
+
+        #middle-controls-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            gap: 15px;
+        }
+
+        #button-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* --- responsive layout --- */
+        @media (max-width: 1300px) {
+            #content-wrapper {
+                flex-direction: column;
+                align-items: center;
+                height: auto;
+                width: 95%;
+            }
+
+            #controls {
+                width: 95%;
+                max-width: 500px;
+                height: auto;
+                margin-top: 0;
+            }
+
+            #main-container {
+                margin-top: -20px;
+                width: 100%;
+                height: 50vh;
+                flex-grow: 0;
+            }
+
+            #middle-controls-wrapper {
+                flex-direction: row;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <h1>dynamical heterogeneity visualization</h1>
+    <div id="info">
+        top 5% fastest and slowest particles are highlighted. lower temperature to observe spatial clustering of mobility.
+    </div>
+    <div id="errorDisplay"></div>
+
+    <div id="content-wrapper">
+
+        <div id="controls" style="margin-bottom: 15px;">
+
+            <div id="temp-control">
+                <label for="tempSlider">temp:</label>
+                <input type="range" id="tempSlider" min="0.01" max="2.0" step="0.01" value="2.0">
+                <span id="tempValue">2.00</span>
+            </div>
+
+            <div id="middle-controls-wrapper">
+
+                <div id="button-stack">
+                    <div id="pause-reset-buttons">
+                        <button id="pauseButton">pause</button>
+                        <button id="resetButton">reset</button>
+                    </div>
+                    <button id="hideAvgButton">hide average</button>
+                </div>
+
+                <div id="input-stack">
+                    <div class="input-group">
+                        <label for="fpsInput">fps:</label>
+                        <input type="number" id="fpsInput" min="1" max="60" value="20">
+                    </div>
+                    <div class="input-group">
+                        <label for="gridSizeInput">grid:</label>
+                        <input type="number" id="gridSizeInput" min="10" max="50" step="1" value="25">
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="particle-count-box">
+                <span id="particleCountDisplay">particles: n/a</span>
+            </div>
+        </div>
+
+        <div id="main-container">
+            <div id="container">
+                <div id="loading" class="loading">init...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.161.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/" } }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- state variables ---
+        let mobilityGrid, nextMobilityGrid;
+        let particles = [];
+        let scene, camera, renderer, controls;
+        let temperature = 2.0;
+        let correlationStrength = 0.5; let noiseLevel = 0.1;
+        let targetSimulationFPS = 20;
+        let simulationIntervalMs = 1000 / targetSimulationFPS;
+        let lastSimUpdateTime = 0; let isPaused = false;
+        let highlightThresholdLow = 0.1; let highlightThresholdHigh = 0.9;
+        let isUserInteracting = false;
+        let needsVisualUpdate = true;
+        let animationFrameId = null;
+        let hideAverageParticles = true;
+
+        // --- constants ---
+        let gridSize = 25;
+        const spacing = 1.0; const particleRadius = 0.35;
+        const amorphousDisplacementFactor = spacing * 0.3;
+        const highlightFraction = 0.05;
+        const scaleLarge = 1.5;
+        const scaleNormal = 0.8;
+        const alphaLow = 0.8;
+        const simulationSubsteps = 0.01;
+        const coolwarmPoints = [
+            { val: 0.0, rgb: [0.1, 0.1, 0.5] },
+            { val: 0.5, rgb: [0.85, 0.85, 0.85] },
+            { val: 1.0, rgb: [0.5, 0.0, 0.0] }
+        ];
+
+        // define geometry detail levels
+        const HIGH_DETAIL_SEGMENTS = { width: 10, height: 6 };
+        const LOW_DETAIL_SEGMENTS = { width: 6, height: 4 };
+
+        let highDetailGeometry, lowDetailGeometry;
+        try {
+            highDetailGeometry = new THREE.SphereGeometry(particleRadius, HIGH_DETAIL_SEGMENTS.width, HIGH_DETAIL_SEGMENTS.height);
+            lowDetailGeometry = new THREE.SphereGeometry(particleRadius, LOW_DETAIL_SEGMENTS.width, LOW_DETAIL_SEGMENTS.height);
+        } catch (error) { displayError(`failed to create geometries: ${error.message}`); throw error; }
+
+        let colorLerpFactor = Math.max(0.01, Math.min(0.99, 1.0 - Math.pow(0.1, targetSimulationFPS / 60.0)));
+
+        // --- utility ---
+        function getCoolwarmColor(value) {
+            value = Math.max(0, Math.min(1, value)); let c1, c2;
+            for (let i = 0; i < coolwarmPoints.length - 1; i++) { if (value >= coolwarmPoints[i].val && value <= coolwarmPoints[i+1].val) { c1 = coolwarmPoints[i]; c2 = coolwarmPoints[i+1]; break; } }
+            if (!c1 && value <= coolwarmPoints[0].val) { c1 = c2 = coolwarmPoints[0]; } else if (!c2 && value >= coolwarmPoints[coolwarmPoints.length - 1].val) { c1 = c2 = coolwarmPoints[coolwarmPoints.length - 1]; } else if (!c1 || !c2) { console.warn("color interp points fail"); const mid=coolwarmPoints[Math.floor(coolwarmPoints.length/2)]; return new THREE.Color(mid.rgb[0], mid.rgb[1], mid.rgb[2]); }
+            const factor = (c2.val === c1.val) ? 0 : (value - c1.val) / (c2.val - c1.val);
+            const r = c1.rgb[0] + (c2.rgb[0] - c1.rgb[0]) * factor; const g = c1.rgb[1] + (c2.rgb[1] - c1.rgb[1]) * factor; const b = c1.rgb[2] + (c2.rgb[2] - c1.rgb[2]) * factor;
+            return new THREE.Color(r, g, b);
+        }
+        function showLoading(show) {
+          try { const display = show ? 'block' : 'none'; const loadingEl = document.getElementById('loading'); if(loadingEl) loadingEl.style.display = display; } catch(e){ console.error("err loading indicator:", e); }
+        }
+        function displayError(message) {
+             const errorDiv = document.getElementById('errorDisplay'); if (errorDiv) { errorDiv.textContent = `error: ${message}`; errorDiv.style.display = 'block'; }
+             console.error(message); showLoading(false); if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        }
+
+        // --- simulation & control ---
+        function updateSimulationParameters() {
+            try {
+                temperature = parseFloat(document.getElementById('tempSlider').value);
+                document.getElementById('tempValue').textContent = temperature.toFixed(2);
+                correlationStrength = 0.95 / (1 + temperature * 2.5) + 0.04;
+                noiseLevel = 0.001 + temperature * 0.04;
+                needsVisualUpdate = true;
+                console.log(`params updated: t=${temperature.toFixed(2)}, corr=${correlationStrength.toFixed(3)}, noise=${noiseLevel.toFixed(4)}`);
+            } catch (error) { displayError(`error updating parameters: ${error.message}`); }
+        }
+        function updateFPS() {
+             try {
+                const fpsInput = document.getElementById('fpsInput');
+                let fps = parseInt(fpsInput.value, 10);
+                if (isNaN(fps)) fps = targetSimulationFPS;
+                fps = Math.max(1, Math.min(60, fps)); fpsInput.value = fps;
+                targetSimulationFPS = fps; simulationIntervalMs = 1000 / targetSimulationFPS;
+                colorLerpFactor = Math.max(0.01, Math.min(0.99, 1.0 - Math.pow(0.1, targetSimulationFPS / 60.0)));
+                console.log(`color lerp factor set to ${colorLerpFactor.toFixed(3)}`);
+                console.log(`simulation fps set to ${targetSimulationFPS}, interval: ${simulationIntervalMs.toFixed(1)} ms`);
+            } catch (error) { displayError(`error updating fps: ${error.message}`); }
+        }
+        function updateGridSize() {
+            try {
+                const input = document.getElementById('gridSizeInput');
+                let newSize = parseInt(input.value, 10);
+                if (isNaN(newSize)) {
+                    newSize = gridSize;
+                } else {
+                    newSize = Math.max(10, Math.min(50, newSize));
+                }
+                input.value = newSize;
+
+                if (newSize !== gridSize) {
+                    gridSize = newSize;
+                    console.log(`grid size changed to ${gridSize}. resetting simulation.`);
+                    initSimulation();
+                } else {
+                    console.log("grid size input changed but value is the same. no reset.");
+                }
+            } catch (error) {
+                displayError(`error updating grid size: ${error.message}`);
+                const input = document.getElementById('gridSizeInput');
+                if (input) input.value = gridSize;
+            }
+        }
+        function updateCameraView() {
+            if (!camera || !controls) {
+                console.warn("camera or controls not ready for view update.");
+                return;
+            }
+            try {
+                const boxSize = gridSize * spacing;
+                camera.position.z = boxSize * 1.4;
+                camera.position.y = boxSize * 0.6;
+
+                controls.target.set(0, -boxSize * 0.1, 0);
+
+                controls.update();
+                camera.lookAt(controls.target);
+                console.log(`camera view updated for gridSize ${gridSize}`);
+            } catch (error) {
+                displayError(`error updating camera view: ${error.message}`);
+            }
+        }
+        function initSimulation() {
+            console.log("init: starting..."); showLoading(true); const errorDiv = document.getElementById('errorDisplay'); if (errorDiv) errorDiv.style.display = 'none';
+
+            try {
+                console.log("init: clearing scene...");
+                if (scene) {
+                    while(particles.length > 0) {
+                        const p = particles.pop();
+                        if (p.mesh && p.mesh.parent === scene) scene.remove(p.mesh);
+                        if (p.material) p.material.dispose();
+                    }
+                } else { console.warn("init: scene not found during clearing."); }
+                particles = [];
+
+                console.log("init: initializing grids...");
+                mobilityGrid = new Array(gridSize); nextMobilityGrid = new Array(gridSize);
+                const boxSize = gridSize * spacing; const offset = -boxSize / 2 + spacing / 2;
+                for (let i = 0; i < gridSize; i++) {
+                    mobilityGrid[i] = new Array(gridSize); nextMobilityGrid[i] = new Array(gridSize);
+                    for (let j = 0; j < gridSize; j++) {
+                        mobilityGrid[i][j] = new Array(gridSize); nextMobilityGrid[i][j] = new Array(gridSize);
+                        for (let k = 0; k < gridSize; k++) {
+                            mobilityGrid[i][j][k] = Math.random();
+                            const initialColor = getCoolwarmColor(0.5);
+                            const material = new THREE.MeshStandardMaterial({
+                                color: initialColor,
+                                transparent: true,
+                                opacity: 1.0,
+                                metalness: 0.0,
+                                roughness: 1.0
+                            });
+                            if (!lowDetailGeometry) throw new Error("lowDetailGeometry is not defined");
+                            const mesh = new THREE.Mesh(lowDetailGeometry, material);
+                            const randomDisplacement = () => (Math.random() - 0.5) * 2 * amorphousDisplacementFactor;
+                            mesh.position.set( offset + i * spacing + randomDisplacement(), offset + j * spacing + randomDisplacement(), offset + k * spacing + randomDisplacement() );
+                            mesh.scale.set(scaleNormal, scaleNormal, scaleNormal);
+                            mesh.visible = true;
+                            if (scene) scene.add(mesh); else throw new Error("scene not available");
+                            particles.push({
+                                mesh: mesh,
+                                i: i, j: j, k: k,
+                                material: material,
+                                targetColor: initialColor.clone(),
+                                previousColor: initialColor.clone()
+                            });
+                        }
+                    }
+                }
+
+                console.log(`init: created ${particles.length} particles.`);
+                updateSimulationParameters(); updateFPS();
+                needsVisualUpdate = true;
+                const countDisplay = document.getElementById('particleCountDisplay');
+                if (countDisplay) countDisplay.textContent = `particles: ${particles.length.toLocaleString()}`;
+
+                const hideAvgButton = document.getElementById('hideAvgButton');
+                if (hideAvgButton) {
+                    hideAvgButton.textContent = 'show average';
+                    hideAvgButton.classList.add('active');
+                }
+
+                updateCameraView();
+
+                console.log("init: logic complete.");
+
+            } catch (error) { displayError(`error during initSimulation: ${error.message}`); return; }
+            finally { showLoading(false); console.log("init: finished."); }
+        }
+
+        function updateMobilityGrid() {
+             if (!mobilityGrid || !nextMobilityGrid) { console.warn("grids not initialized, skipping mobility update."); return; }
+             const pbc = (coord) => (coord + gridSize) % gridSize;
+             for (let i = 0; i < gridSize; i++) for (let j = 0; j < gridSize; j++) for (let k = 0; k < gridSize; k++) {
+                 let s=0, c=0; const n=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+                 for (const [di,dj,dk] of n) { const ni=pbc(i+di), nj=pbc(j+dj), nk=pbc(k+dk); s+=mobilityGrid[ni][nj][nk]; c++; }
+                 const avg=(c>0)?s/c:mobilityGrid[i][j][k]; const cur=mobilityGrid[i][j][k];
+                 let nxt=cur*(1.0-correlationStrength)+avg*correlationStrength+(Math.random()-0.5)*2*noiseLevel;
+                 nextMobilityGrid[i][j][k]=Math.max(1e-6,Math.min(1.0-1e-6,nxt));
+             }
+             [mobilityGrid, nextMobilityGrid]=[nextMobilityGrid, mobilityGrid];
+        }
+
+        // --- visual update ---
+        function updateParticleVisuals() {
+            if (!needsVisualUpdate || !particles || particles.length === 0 || !scene || !mobilityGrid) return;
+
+            try {
+                let minM=Infinity, maxM=-Infinity; const allM=[]; for(let i=0;i<gridSize;i++)for(let j=0;j<gridSize;j++)for(let k=0;k<gridSize;k++){const m=mobilityGrid[i][j][k];allM.push(m);minM=Math.min(minM,m);maxM=Math.max(maxM,m);} const range=maxM-minM; const sortedM=[...allM].sort((a,b)=>a-b); const cnt=particles.length; const cutL=Math.floor(cnt*highlightFraction); const cutH=Math.ceil(cnt*(1.0-highlightFraction)); highlightThresholdLow=sortedM[Math.min(cutL,cnt-1)]; highlightThresholdHigh=sortedM[Math.max(0,cutH-1)]; const compL=highlightThresholdLow+1e-9; const compH=highlightThresholdHigh+1e-9;
+
+                particles.forEach(p => {
+                    if (!p || !p.mesh || !p.material) return;
+                    const currentMobility = mobilityGrid[p.i][p.j][p.k];
+                    let normM = (range > 1e-6) ? (currentMobility - minM) / range : 0.5;
+                    p.targetColor.copy(getCoolwarmColor(normM));
+
+                    let isHighlighted = (currentMobility <= compL) || (currentMobility >= compH);
+
+                    const targetGeometry = isHighlighted ? highDetailGeometry : lowDetailGeometry;
+                    if (p.mesh.geometry !== targetGeometry) {
+                        p.mesh.geometry = targetGeometry;
+                    }
+
+                    p.material.opacity = isHighlighted ? 1.0 : alphaLow;
+                    const scale = isHighlighted ? scaleLarge : scaleNormal;
+                    p.mesh.scale.set(scale, scale, scale);
+
+                    p.mesh.visible = isHighlighted ? true : !hideAverageParticles;
+                });
+
+                needsVisualUpdate = false;
+
+            } catch (error) { displayError(`error updating visuals: ${error.message}`); }
+        }
+
+
+        // --- event handlers ---
+        function toggleHideAverage() {
+            try {
+                hideAverageParticles = !hideAverageParticles;
+                const button = document.getElementById('hideAvgButton');
+                if (button) {
+                     button.textContent = hideAverageParticles ? 'show average' : 'hide average';
+                     button.classList.toggle('active', hideAverageParticles);
+                }
+                needsVisualUpdate = true;
+                console.log("hide average toggled:", hideAverageParticles);
+            } catch(e) { displayError(`error toggling average: ${e.message}`); }
+        }
+
+        function togglePause() {
+             try {
+                isPaused = !isPaused;
+                console.log("pause toggled. isPaused =", isPaused);
+                const button = document.getElementById('pauseButton');
+                if (button) { button.textContent = isPaused ? 'play' : 'pause'; button.classList.toggle('paused', isPaused); }
+                if (!isPaused) { lastSimUpdateTime = performance.now(); }
+             } catch(e) { displayError(`error toggling pause: ${e.message}`); }
+        }
+        function onWindowResize() {
+            try {
+                const container = document.getElementById('container');
+                if (container && camera && renderer) {
+                    camera.aspect = container.clientWidth / container.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.clientWidth, container.clientHeight);
+                }
+             } catch (error) { displayError(`error on resize: ${error.message}`); }
+        }
+
+        // --- initialization ---
+        function init() {
+            console.log("main init: starting...");
+            showLoading(true);
+            const errorDiv = document.getElementById('errorDisplay'); if (errorDiv) errorDiv.style.display = 'none';
+
+            try {
+                const container = document.getElementById('container');
+                if (!container) throw new Error("main viewport container not found");
+
+                scene = new THREE.Scene();
+                const computedStyle = getComputedStyle(container);
+                const bgColor = computedStyle.getPropertyValue('--viewport-bg').trim();
+                scene.background = new THREE.Color(bgColor);
+                camera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 0.1, 1000);
+                renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+                renderer.setSize(container.clientWidth, container.clientHeight); container.appendChild(renderer.domElement);
+                controls = new OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+
+                const ambientLight = new THREE.AmbientLight(0x666666, 20.0);
+                scene.add(ambientLight);
+                const dirLight = new THREE.DirectionalLight(0xffffff, 2.5);
+                dirLight.position.set(0.8, 1, 0.6).normalize(); scene.add(dirLight);
+                const dirLight2 = new THREE.DirectionalLight(0xffffff, 1.5);
+                dirLight2.position.set(-0.8, -1, -0.6).normalize(); scene.add(dirLight2);
+                const dirLight3 = new THREE.DirectionalLight(0xffffff, 0.5);
+                dirLight3.position.set(-0.5, -0.0, 1.0).normalize();
+                scene.add(dirLight3);
+
+                if (controls) {
+                    controls.addEventListener('start', () => { isUserInteracting = true; });
+                    controls.addEventListener('end', () => { isUserInteracting = false; });
+                } else {
+                    console.warn("orbitcontrols not found, cannot add interaction listeners.");
+                }
+
+                const tempSlider=document.getElementById('tempSlider'); if(tempSlider)tempSlider.addEventListener('input',updateSimulationParameters); else console.warn("no temp slider");
+                const resetButton=document.getElementById('resetButton'); if(resetButton)resetButton.addEventListener('click',initSimulation); else console.warn("no reset btn");
+                const hideAvgButton=document.getElementById('hideAvgButton'); if(hideAvgButton)hideAvgButton.addEventListener('click',toggleHideAverage); else console.warn("no hide avg btn");
+                const pauseButton=document.getElementById('pauseButton'); if(pauseButton)pauseButton.addEventListener('click',togglePause); else console.warn("no pause btn");
+                const fpsInput=document.getElementById('fpsInput'); if(fpsInput)fpsInput.addEventListener('change',updateFPS); else console.warn("no fps input");
+                const gridSizeInput=document.getElementById('gridSizeInput'); if(gridSizeInput)gridSizeInput.addEventListener('change',updateGridSize); else console.warn("no grid size input");
+                window.addEventListener('resize',onWindowResize,false);
+
+                initSimulation();
+                lastSimUpdateTime = performance.now();
+                animate();
+                console.log("main init: setup complete, loop started.");
+
+            } catch (error) { displayError(`initialization failed: ${error.message}`); }
+        }
+
+        // --- animation loop ---
+        function animate() {
+            animationFrameId = requestAnimationFrame(animate);
+            try {
+                const now = performance.now();
+
+                if (!isPaused && (now - lastSimUpdateTime > simulationIntervalMs)) {
+                    updateMobilityGrid();
+                    needsVisualUpdate = true;
+                    lastSimUpdateTime = now;
+                }
+
+                if (needsVisualUpdate) {
+                    updateParticleVisuals();
+                }
+
+                if(controls) controls.update();
+
+                particles.forEach(p => {
+                    if (p && p.mesh.visible && p.material && p.previousColor && p.targetColor) {
+                        p.material.color.lerpColors(p.previousColor, p.targetColor, colorLerpFactor);
+                        p.previousColor.copy(p.material.color);
+                    }
+                });
+
+                if (!isUserInteracting) {
+                    const time = now * 0.002;
+                    const rockAmplitude = 0.2;
+                    const rockIntensity = 0.3;
+                    if (camera) {
+                        camera.position.x += Math.sin(time) * rockAmplitude * rockIntensity;
+                        camera.position.y += Math.cos(time) * rockAmplitude * rockIntensity * 0.5;
+                    }
+                }
+                if(renderer && scene && camera) renderer.render(scene, camera);
+
+            } catch (error) { displayError(`error in animation loop: ${error.message}`); }
+        }
+
+        // --- start ---
+        document.addEventListener('DOMContentLoaded', init);
+
+    </script>
+
+</body>
+</html>
