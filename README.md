@@ -2,7 +2,7 @@
 
 ## Goal
 
-This project provides an interactive, web-based tool for visualizing **Dynamical Heterogeneity**, a phenomenon in supercooled liquids approaching the glass transition where slow and fast particles cluster into spatial regions. It serves as a visual aid for observing how system parameters influence the emergence and structure of spatially distinct slow and fast regions, rather than being a scientific simulation.
+This project provides an interactive, web-based tool for visualizing **Dynamical Heterogeneity**, a phenomenon prominent in systems like supercooled liquids approaching the glass transition. It serves as a visual aid for observing how system parameters influence the emergence and structure of spatially distinct slow and fast regions, rather than being a quantitatively precise scientific simulation.
 
 ## Key Features
 
@@ -28,19 +28,19 @@ The simulation uses a simplified **3D grid-based cellular automaton** model, not
 The mobility \( M_{i,j,k}(t+1) \) is updated based on its current state and its neighbors' average state:
 
 1.  **Neighbor Average:** Calculate \( \bar{M}_{\text{neighbors}}(t) \) of the 6 nearest neighbors (using PBC).
-    \[
+    $$
     \bar{M}_{\text{neighbors}}(t) = \frac{1}{6} \sum_{\text{neighbors } n} M_{n}(t)
-    \]
+    $$
 2.  **Update Rule:** New mobility \( M' \) is a weighted average plus noise:
-    \[
+    $$
     M'_{i,j,k}(t+1) = (1 - C) M_{i,j,k}(t) + C \bar{M}_{\text{neighbors}}(t) + \n(t)
-    \]
+    $$
     *   \( C \): `correlationStrength` (neighbor influence).
     *   \( \n(t) \): Uniform noise in \( [-N, N] \), where \(N\) is `noiseLevel`.
 3.  **Clamping:** Result \( M' \) is clamped strictly within \( (\epsilon, 1 - \epsilon) \) (with \( \epsilon = 10^{-6} \)).
-    \[
+    $$
     M_{i,j,k}(t+1) = \max(\epsilon, \min(1 - \epsilon, M'_{i,j,k}(t+1)))
-    \]
+    $$
 4.  **Temperature Influence:** The "Temperature" slider \(T\) controls \(C\) and \(N\):
     *   `correlationStrength` \(C = 0.95 / (1 + T \times 2.5) + 0.04\) (Decreases with \(T\))
     *   `noiseLevel` \(N = 0.001 + T \times 0.04\) (Increases with \(T\))
