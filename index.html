@@ -10,6 +10,10 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-title" content="Dynamical Heterogeneity" />
   <link rel="manifest" href="/favicons/site.webmanifest" />
+
+	<!-- neubrutalism css -->
+	<link rel="stylesheet" href="neobrutalism.css">
+
   <title>Dynamical Heterogeneity Visualization</title>
   <style>
     /* --- light mode neo-brutalist styling --- */
@@ -17,13 +21,12 @@
       --background-color: #f0f0f0; /* off-white */
       --text-color: #1a1a1a; /* dark text */
       --border-color: #1a1a1a; /* dark borders */
-      --accent-color: #0055ff; /* electric blue */
+      --accent-color: #5d93ff; /* electric blue */
+			--accent-color-dark: #023db3; /* dark blue */
       --controls-bg: #e0e0e0; /* light grey */
       --input-bg: #ffffff; /* white */
-      --button-text: #ffffff; /* white text on accent */
       --viewport-bg: #ffffff; /* white viewport background */
       --container-border-width: 2px; /* thicker border */
-      --container-border: var(--container-border-width) solid var(--border-color);
     }
 
     html {
@@ -34,7 +37,6 @@
 
     body {
       padding-top: env(safe-area-inset-top, 0px); /* add padding for iOS safe area */
-      font-family: 'Arial', 'Helvetica', sans-serif;
       background-color: var(--background-color);
       color: var(--text-color);
       display: flex;
@@ -42,11 +44,13 @@
       align-items: center;
       height: 100vh;
       line-height: 1.4;
+			font-size: 1.1em;
+      font-weight: bold; /* Make all text bold by default */
     }
 
     h1 {
       margin: 10px 0 5px 0; font-size: 1.8em; font-weight: bold;
-      text-align: center; color: var(--border-color); letter-spacing: 1px;
+      text-align: center; letter-spacing: 1px;
     }
 
     #info {
@@ -62,23 +66,21 @@
       margin-top: 5px;
       flex-grow: 1;
       height: 90%;
+      background-color: var(--viewport-bg); /* Ensure white background */
     }
 
     #container {
       width: 100%;
-      max-width: 1000px;
       height: 100%;
-      border: var(--container-border);
       position: relative;
       background-color: var(--viewport-bg);
-      border-radius: 0;
     }
 
     canvas { display: block; width: auto !important; height: 100% !important; border-radius: 0; }
 
     #controls {
       padding: 20px 20px; background-color: var(--controls-bg);
-      border: var(--container-border); border-radius: 0; margin-top: 5px;
+      margin-top: 5px;
       display: flex; flex-direction: column; align-items: center;
       width: 95%; max-width: 250px;
       gap: 20px;
@@ -97,25 +99,20 @@
     }
 
     label {
-      font-weight: bold; min-width: fit-content; text-align: right;
+      min-width: fit-content; text-align: right;
       font-size: 0.8em; color: #333; margin-right: 0;
     }
 
     input[type="range"] {
-      flex-grow: 1; cursor: pointer; min-width: 120px; height: 6px;
-      background: #ccc; border: var(--container-border-width) solid var(--border-color); border-radius: 0; padding: 0;
-      appearance: none; -webkit-appearance: none;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; appearance: none; width: 10px; height: 18px; background: var(--accent-color); cursor: pointer; border-radius: 0; border: var(--container-border-width) solid var(--border-color);
-    }
-    input[type="range"]::-moz-range-thumb {
-      width: 10px; height: 18px; background: var(--accent-color); cursor: pointer; border-radius: 0; border: var(--container-border-width) solid var(--border-color);
+      /* Styles for sliders are now primarily handled by neobrutalism.css */
+      /* We can keep basic flex behavior if needed */
+      flex-grow: 1;
+      min-width: 120px; /* Keep minimum width */
     }
 
     input[type="number"] {
       width: 55px; text-align: right; background-color: var(--input-bg); color: var(--text-color);
-      border: var(--container-border-width) solid var(--border-color); border-radius: 0; padding: 4px;
+      padding: 4px;
       font-family: monospace;
       font-size: 16px; /* explicitly set to 16px+ to prevent mobile zoom */
     }
@@ -123,50 +120,54 @@
     input[type=number] { -moz-appearance: textfield; }
 
     #tempValue, #fpsValue {
-      font-weight: bold; color: var(--accent-color); min-width: 40px; text-align: left;
+      color: var(--accent-color-dark); min-width: 40px; text-align: left;
       font-size: 0.9em; font-family: monospace;
     }
 
-    button {
-      padding: 6px 12px; cursor: pointer; background-color: var(--accent-color); color: var(--button-text);
-      border: var(--container-border-width) solid var(--border-color); border-radius: 0; font-size: 0.8em; font-weight: bold;
+    /* Base button styles are now applied individually */
+
+    /* Default state (showing "Pause") */
+    #pauseButton.nb-border.nb-shadow {
+      padding: 6px 12px; cursor: pointer;
+      font-size: 0.8em; font-weight: bold;
       transition: background-color 0.1s, color 0.1s;
+      background-color: #e96565;
+      color: #000; /* Black text */
     }
-    button:hover {
-      background-color: var(--background-color); color: var(--accent-color); border-color: var(--accent-color);
+    #pauseButton.nb-border.nb-shadow:hover {
+      background-color: #df412f; /* Darker red */
+      color: #000; /* Ensure black text on hover */
     }
-    #pauseButton {
-      background-color: #e08080;
-      border-color: var(--border-color);
-      color: var(--text-color);
-    }
-    #pauseButton:hover {
-      background-color: var(--background-color);
-      color: #c0392b;
-      border-color: #c0392b;
-    }
-    #pauseButton.paused {
+    #pauseButton.nb-border.nb-shadow.paused {
       background-color: #80c080;
-      border-color: var(--border-color);
-      color: var(--text-color);
+      color: #000; /* Black text */
     }
-    #pauseButton.paused:hover {
-      background-color: var(--background-color);
-      color: #2ecc71;
-      border-color: #2ecc71;
+    #pauseButton.nb-border.nb-shadow.paused:hover {
+      background-color: #27ae60; /* Darker green */
+      color: #000; /* Ensure black text on hover */
     }
-    button.active {
-       background-color: #333;
-       color: #fff;
-       border-color: #000;
+    /* Reset Button Style */
+    #resetButton.nb-border.nb-shadow {
+      padding: 6px 12px; cursor: pointer;
+      font-size: 0.8em; font-weight: bold;
+      transition: background-color 0.1s, color 0.1s;
+      background-color: var(--accent-color);
+      color: #000; /* Black text */
+    }
+    #resetButton.nb-border.nb-shadow:hover {
+      background-color: #3074fa; /* Darker blue */
+      color: #000; /* Ensure black text on hover */
+    }
+    button.active { /* style for active hide/show button */
+      background-color: #333;
+      color: #fff;
     }
      button.active:hover {
        background-color: #555;
-       border-color: #000;
      }
 
     #modeStatus { font-size: 0.8em; color: #555; flex-basis: 100%; text-align: center; margin-top: 4px; }
-    #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5em; color: var(--text-color); background-color: rgba(240,240,240,0.8); padding: 20px; border-radius: 0; z-index: 100; display: none; border: var(--container-border); }
+    #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5em; color: var(--text-color); background-color: rgba(240,240,240,0.8); padding: 20px; border-radius: 0; z-index: 100; display: none; }
     #errorDisplay { color: red; margin-top: 5px; font-weight: bold; text-align: center; display: none; background-color: #fdd; border: 2px solid red; padding: 5px; border-radius: 0; }
 
     #input-column {
@@ -182,12 +183,11 @@
     }
 
     #particle-count-box {
-      border: var(--container-border-width) solid var(--border-color);
       padding: 5px 10px;
       margin-top: 8px;
       background-color: var(--input-bg);
       text-align: center;
-      font-size: 0.9em;
+      font-size: 14px;
       font-weight: bold;
       width: fit-content;
       align-self: center;
@@ -300,8 +300,8 @@
     }
     #infoButton {
       background-color: var(--controls-bg);
-      color: var(--text-color);
-      border: var(--container-border);
+      color: #000; /* Black text */
+      border: var(--container-border-width) solid var(--border-color);
       border-radius: 50%;
       width: 24px;
       height: 24px;
@@ -312,9 +312,9 @@
       cursor: pointer;
       padding: 0;
     }
-    #infoButton:hover {
-       background-color: var(--accent-color);
-       color: var(--button-text);
+    #infoButton.nb-border.nb-shadow:hover {
+      background-color: var(--accent-color);
+      color: #000; /* Black text */
     }
 
     #infoDropdown {
@@ -324,7 +324,7 @@
       right: 0;
       margin-top: 15px;
       background-color: var(--background-color);
-      border: var(--container-border);
+      border: var(--container-border-width) solid var(--border-color);
       padding: 10px;
       width: 220px;
       z-index: 100;
@@ -349,22 +349,88 @@
        margin-bottom: 5px;
     }
 
+    footer {
+        text-align: center;
+        padding: 15px 0;
+        margin-top: 20px; /* Add some space above the footer */
+        font-size: 0.9em;
+        color: #555; /* Subdued text color */
+    }
+
+    footer p {
+        margin: 5px 0;
+    }
+
+    footer a {
+        color: var(--accent-color); /* Use accent color for links */
+        text-decoration: none;
+        margin: 0 8px; /* Keep spacing */
+    }
+
+    footer a:hover {
+        text-decoration: underline;
+    }
+
+    /* Footer Link Button Styles */
+    .footer-link-button {
+        display: inline-block; /* Behave like buttons */
+        padding: 4px 10px; /* Adjust padding */
+        margin: 0 5px; /* Space out buttons */
+        text-decoration: none; /* Remove underline */
+        font-weight: bold; /* Match body bold */
+        transition: background-color 0.1s;
+        /* Inherits border/shadow from nb-border/nb-shadow classes */
+    }
+
+    .github-link {
+        background-color: #6E5494;
+        color: #ffffff;
+    }
+    .github-link:hover {
+        background-color: #5a447a; /* Darker purple */
+        color: #ffffff; /* Ensure text stays white */
+    }
+
+    .linkedin-link {
+        background-color: #0A66C2;
+        color: #ffffff;
+    }
+    .linkedin-link:hover {
+        background-color: #0854a0; /* Darker blue */
+        color: #ffffff; /* Ensure text stays white */
+    }
+
+    /* Hide Average Button Style (Default) */
+    #hideAvgButton.nb-border.nb-shadow {
+        /* Add default styles similar to reset button */
+        padding: 6px 12px; cursor: pointer;
+        font-size: 0.8em; font-weight: bold;
+        transition: background-color 0.1s, color 0.1s, filter 0.1s;
+        background-color: #ffa500; /* Orange */
+        color: #000; /* Black text */
+        /* Border/shadow from classes */
+    }
+    #hideAvgButton.nb-border.nb-shadow:hover {
+        background-color: #e69500; /* Darker orange */
+        color: #000; /* Ensure black text on hover */
+    }
+
   </style>
 </head>
-<body>
-  <h1>dynamical heterogeneity visualization</h1>
-  <div id="info">
+<body class="nb-font">
+  <h1 style="line-height: 1.0; width: 97%;">dynamical heterogeneity visualization</h1>
+  <div id="info" style="line-height: 1.2; margin-bottom: 5px; margin-top: 5px; width: 90%;">
     top 5% fastest and slowest particles are highlighted. lower temperature to observe spatial clustering of mobility.
   </div>
   <div id="errorDisplay"></div>
 
   <div id="content-wrapper">
 
-    <div id="controls" style="margin-bottom: 15px;">
+    <div id="controls" class="nb-border nb-shadow" style="margin-bottom: 15px;">
 
-      <div id="temp-control">
-        <label for="tempSlider">temp:</label>
-        <input type="range" id="tempSlider" min="0.01" max="2.0" step="0.01" value="2.0">
+      <div id="temp-control" style="margin-top: -8px;">
+        <label for="tempSlider">temp</label>
+        <input type="range" id="tempSlider" class="nb-border nb-shadow nb-range" min="0.01" max="2.0" step="0.01" value="2.0">
         <span id="tempValue" style="margin-left: 5px;">2.00</span>
       </div>
 
@@ -372,38 +438,38 @@
 
         <div id="button-stack">
           <div id="pause-reset-buttons">
-            <button id="pauseButton">pause</button>
-            <button id="resetButton">reset</button>
+            <button id="pauseButton" class="nb-border nb-shadow">pause</button>
+            <button id="resetButton" class="nb-border nb-shadow">reset</button>
           </div>
-          <button id="hideAvgButton">hide average</button>
+          <button id="hideAvgButton" class="nb-border nb-shadow">hide average</button>
         </div>
 
         <div id="input-stack">
-          <div class="input-group" style="margin-left: 5px;">
-            <label for="fpsInput">fps:</label>
-            <input type="number" id="fpsInput" min="1" max="60" value="20">
+          <div class="input-group" style="margin-left: 8px;">
+            <label for="fpsInput">fps</label>
+            <input type="number" id="fpsInput" class="nb-input nb-border nb-shadow" min="1" max="60" value="20">
           </div>
           <div class="input-group">
-            <label for="gridSizeInput">grid:</label>
-            <input type="number" id="gridSizeInput" min="10" max="50" step="1" value="25">
+            <label for="gridSizeInput">grid</label>
+            <input type="number" id="gridSizeInput" class="nb-input nb-border nb-shadow" min="10" max="50" step="1" value="25">
           </div>
         </div>
 
       </div>
 
-      <div id="particle-count-box" style="margin-bottom: -10px; margin-top: -5px;">
+      <div id="particle-count-box" class="nb-border nb-shadow" style="margin-bottom: -10px; margin-top: -5px;">
         <span id="particleCountDisplay">particles: n/a</span>
       </div>
       <div id="info-widget-container">
-        <button id="infoButton">?</button>
-        <div id="infoDropdown">
-          <h3>about this visualization</h3>
+        <button id="infoButton" class="nb-border nb-shadow">?</button>
+        <div id="infoDropdown" class="nb-border nb-shadow" style="font-weight: normal;">
+          <h3 style="font-weight: normal;">about this visualization</h3>
           <ul>
             <li>tool to visualize dynamical heterogeneity</li>
             <li>observe clustering of slow (blue) and fast (red) regions</li>
             <li>adjust "temperature" to influence cluster formation</li>
           </ul>
-          <h3>important limitations</h3>
+          <h3 style="font-weight: normal;">important limitations</h3>
           <ul>
             <li><strong>visualization, not simulation:</strong> uses simplified grid model, not molecular dynamics</li>
             <li><strong>abstract state:</strong> uses "mobility", not particle positions/velocities</li>
@@ -414,7 +480,7 @@
       </div>
     </div>
 
-    <div id="main-container">
+    <div id="main-container" class="nb-border nb-shadow">
       <div id="container">
         <div id="loading" class="loading">init...</div>
       </div>
@@ -463,11 +529,13 @@
     // define geometry detail levels
     const HIGH_DETAIL_SEGMENTS = { width: 10, height: 6 };
     const LOW_DETAIL_SEGMENTS = { width: 6, height: 4 };
+    const VERY_LOW_DETAIL_SEGMENTS = { width: 4, height: 2 };
 
-    let highDetailGeometry, lowDetailGeometry;
+    let highDetailGeometry, lowDetailGeometry, veryLowDetailGeometry;
     try {
       highDetailGeometry = new THREE.SphereGeometry(particleRadius, HIGH_DETAIL_SEGMENTS.width, HIGH_DETAIL_SEGMENTS.height);
       lowDetailGeometry = new THREE.SphereGeometry(particleRadius, LOW_DETAIL_SEGMENTS.width, LOW_DETAIL_SEGMENTS.height);
+      veryLowDetailGeometry = new THREE.SphereGeometry(particleRadius, VERY_LOW_DETAIL_SEGMENTS.width, VERY_LOW_DETAIL_SEGMENTS.height);
     } catch (error) { displayError(`failed to create geometries: ${error.message}`); throw error; }
 
     let colorLerpFactor = Math.max(0.01, Math.min(0.99, 1.0 - Math.pow(0.1, targetSimulationFPS / 60.0)));
@@ -571,6 +639,9 @@
         } else { console.warn("init: scene not found during clearing."); }
         particles = [];
 
+        // Determine initial geometry based on grid size
+        const initialGeometry = (gridSize > 40) ? veryLowDetailGeometry : lowDetailGeometry;
+
         console.log("init: initializing grids...");
         mobilityGrid = new Array(gridSize); nextMobilityGrid = new Array(gridSize);
         const boxSize = gridSize * spacing;
@@ -590,8 +661,10 @@
                 metalness: 0.0,
                 roughness: 1.0
               });
-              if (!lowDetailGeometry) throw new Error("lowDetailGeometry is not defined");
-              const mesh = new THREE.Mesh(lowDetailGeometry, material);
+              if (!initialGeometry) throw new Error("initialGeometry could not be determined or is not defined");
+
+              // Use the determined initial geometry
+              const mesh = new THREE.Mesh(initialGeometry, material);
               const randomDisplacement = () => (Math.random() - 0.5) * 2 * amorphousDisplacementFactor;
               mesh.position.set( offset + i * spacing + randomDisplacement(), offset + j * spacing + randomDisplacement() + yShift, offset + k * spacing + randomDisplacement() );
               mesh.scale.set(scaleNormal, scaleNormal, scaleNormal);
@@ -646,27 +719,55 @@
       if (!needsVisualUpdate || !particles || particles.length === 0 || !scene || !mobilityGrid) return;
 
       try {
-        let minM=Infinity, maxM=-Infinity; const allM=[]; for(let i=0;i<gridSize;i++)for(let j=0;j<gridSize;j++)for(let k=0;k<gridSize;k++){const m=mobilityGrid[i][j][k];allM.push(m);minM=Math.min(minM,m);maxM=Math.max(maxM,m);} const range=maxM-minM; const sortedM=[...allM].sort((a,b)=>a-b); const cnt=particles.length; const cutL=Math.floor(cnt*highlightFraction); const cutH=Math.ceil(cnt*(1.0-highlightFraction)); highlightThresholdLow=sortedM[Math.min(cutL,cnt-1)]; highlightThresholdHigh=sortedM[Math.max(0,cutH-1)]; const compL=highlightThresholdLow+1e-9; const compH=highlightThresholdHigh+1e-9;
+        let minM=Infinity, maxM=-Infinity; const allM=[]; for(let i=0;i<gridSize;i++)for(let j=0;j<gridSize;j++)for(let k=0;k<gridSize;k++){const m=mobilityGrid[i][j][k];allM.push(m);minM=Math.min(minM,m);maxM=Math.max(maxM,m);} const range=maxM-minM; const sortedM=[...allM].sort((a,b)=>a-b); const cnt=particles.length; const cutL=Math.floor(cnt*highlightFraction); const cutH=Math.ceil(cnt*(1.0-highlightFraction)); highlightThresholdLow=sortedM[Math.min(cutL,cnt-1)]; highlightThresholdHigh=sortedM[Math.max(0,cutH-1)]; const compL=highlightThresholdLow+1e-9; const compH=highlightThresholdHigh-1e-9;
 
-        particles.forEach(p => {
-          if (!p || !p.mesh || !p.material) return;
-          const currentMobility = mobilityGrid[p.i][p.j][p.k];
-          let normM = (range > 1e-6) ? (currentMobility - minM) / range : 0.5;
-          p.targetColor.copy(getCoolwarmColor(normM));
+        // --- Grid Size Check for Geometry --- 
+        if (gridSize > 40) {
+          // Grid is large: Use VERY LOW detail for ALL particles
+          if (!veryLowDetailGeometry) throw new Error("veryLowDetailGeometry not defined");
+          particles.forEach(p => {
+            if (!p || !p.mesh || !p.material) return;
 
-          let isHighlighted = (currentMobility <= compL) || (currentMobility >= compH);
+            // Set geometry if needed
+            if (p.mesh.geometry !== veryLowDetailGeometry) {
+              p.mesh.geometry = veryLowDetailGeometry;
+            }
 
-          const targetGeometry = isHighlighted ? highDetailGeometry : lowDetailGeometry;
-          if (p.mesh.geometry !== targetGeometry) {
-            p.mesh.geometry = targetGeometry;
-          }
+            // Set visuals based on highlight status (color, opacity, scale, visibility)
+            const currentMobility = mobilityGrid[p.i][p.j][p.k];
+            let normM = (range > 1e-6) ? (currentMobility - minM) / range : 0.5;
+            p.targetColor.copy(getCoolwarmColor(normM));
+            let isHighlighted = (currentMobility <= compL) || (currentMobility >= compH);
 
-          p.material.opacity = isHighlighted ? 1.0 : alphaLow;
-          const scale = isHighlighted ? scaleLarge : scaleNormal;
-          p.mesh.scale.set(scale, scale, scale);
+            p.material.opacity = isHighlighted ? 1.0 : alphaLow;
+            const scale = isHighlighted ? scaleLarge : scaleNormal;
+            p.mesh.scale.set(scale, scale, scale);
+            p.mesh.visible = isHighlighted ? true : !hideAverageParticles;
+          });
+        } else {
+          // Grid is smaller: Use existing High/Low detail logic
+          if (!highDetailGeometry || !lowDetailGeometry) throw new Error("high/low detail geometry not defined");
+          particles.forEach(p => {
+            if (!p || !p.mesh || !p.material) return;
+            const currentMobility = mobilityGrid[p.i][p.j][p.k];
+            let normM = (range > 1e-6) ? (currentMobility - minM) / range : 0.5;
+            p.targetColor.copy(getCoolwarmColor(normM));
 
-          p.mesh.visible = isHighlighted ? true : !hideAverageParticles;
-        });
+            let isHighlighted = (currentMobility <= compL) || (currentMobility >= compH);
+
+            // --- Swap Geometry based on highlighted state (HIGH/LOW) ---
+            const targetGeometry = isHighlighted ? highDetailGeometry : lowDetailGeometry;
+            if (p.mesh.geometry !== targetGeometry) {
+              p.mesh.geometry = targetGeometry;
+            }
+
+            // --- Set Visuals ---
+            p.material.opacity = isHighlighted ? 1.0 : alphaLow;
+            const scale = isHighlighted ? scaleLarge : scaleNormal;
+            p.mesh.scale.set(scale, scale, scale);
+            p.mesh.visible = isHighlighted ? true : !hideAverageParticles;
+          });
+        }
 
         needsVisualUpdate = false;
 
@@ -826,6 +927,18 @@
     document.addEventListener('DOMContentLoaded', init);
 
   </script>
+
+  <footer style="margin-top: 0px;">
+    <p>made by collin and claude</p>
+    <p>
+      <a href="https://github.com/collincollins/visualize-dynamical-heterogeneity" target="_blank" rel="noopener noreferrer" title="GitHub Repository" class="footer-link-button github-link nb-border nb-shadow">
+        GitHub
+      </a>
+      <a href="https://www.linkedin.com/in/collin-squared" target="_blank" rel="noopener noreferrer" title="LinkedIn Profile" class="footer-link-button linkedin-link nb-border nb-shadow">
+        LinkedIn
+      </a>
+    </p>
+  </footer>
 
 </body>
 </html>
