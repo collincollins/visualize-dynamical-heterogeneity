@@ -2,7 +2,7 @@
 
 ## Goal
 
-This project provides an interactive, web-based tool for visualizing **Dynamical Heterogeneity**, a phenomenon prominent in systems like supercooled liquids approaching the glass transition. It serves as a visual aid for observing how system parameters influence the emergence and structure of spatially distinct slow and fast regions, rather than being a quantitatively precise scientific simulation.
+This project provides an interactive, web-based tool for visualizing **Dynamical Heterogeneity**, a characteristic in liquids approaching the glass transition where fast and slow particles cluster into spatial regions that exchange over time. It serves as a visual aid for observing spatially distinct slow and fast regions, rather than being a quantitatively precise scientific simulation.
 
 ## Key Features
 
