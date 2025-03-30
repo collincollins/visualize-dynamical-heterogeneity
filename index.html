@@ -30,13 +30,13 @@
     }
 
     html {
-      background-color: var(--background-color); /* ensure full viewport background, including safe areas */
+      background-color: var(--background-color);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      padding-top: env(safe-area-inset-top, 0px); /* add padding for iOS safe area */
+      padding-top: env(safe-area-inset-top, 0px);
       background-color: var(--background-color);
       color: var(--text-color);
       display: flex;
@@ -45,7 +45,7 @@
       height: 100vh;
       line-height: 1.4;
 			font-size: 1.1em;
-      font-weight: bold; /* Make all text bold by default */
+      font-weight: bold;
     }
 
     h1 {
@@ -61,16 +61,18 @@
     #main-container {
       display: flex;
       justify-content: center;
-      width: 95vw;
+      width: 75vw;
+			max-width: 1150px;
       height: 85vh;
       margin-top: 5px;
       flex-grow: 1;
       height: 90%;
-      background-color: var(--viewport-bg); /* Ensure white background */
+      background-color: var(--viewport-bg);
     }
 
     #container {
       width: 100%;
+      max-width: 1140px;
       height: 100%;
       position: relative;
       background-color: var(--viewport-bg);
@@ -104,10 +106,8 @@
     }
 
     input[type="range"] {
-      /* Styles for sliders are now primarily handled by neobrutalism.css */
-      /* We can keep basic flex behavior if needed */
       flex-grow: 1;
-      min-width: 120px; /* Keep minimum width */
+      min-width: 120px;
     }
 
     input[type="number"] {
@@ -124,41 +124,38 @@
       font-size: 0.9em; font-family: monospace;
     }
 
-    /* Base button styles are now applied individually */
-
-    /* Default state (showing "Pause") */
     #pauseButton.nb-border.nb-shadow {
       padding: 6px 12px; cursor: pointer;
       font-size: 0.8em; font-weight: bold;
       transition: background-color 0.1s, color 0.1s;
       background-color: #e96565;
-      color: #000; /* Black text */
+      color: #000;
     }
     #pauseButton.nb-border.nb-shadow:hover {
-      background-color: #df412f; /* Darker red */
-      color: #000; /* Ensure black text on hover */
+      background-color: #df412f;
+      color: #000;
     }
     #pauseButton.nb-border.nb-shadow.paused {
       background-color: #80c080;
-      color: #000; /* Black text */
+      color: #000;
     }
     #pauseButton.nb-border.nb-shadow.paused:hover {
-      background-color: #27ae60; /* Darker green */
-      color: #000; /* Ensure black text on hover */
+      background-color: #27ae60;
+      color: #000; 
     }
-    /* Reset Button Style */
+
     #resetButton.nb-border.nb-shadow {
       padding: 6px 12px; cursor: pointer;
       font-size: 0.8em; font-weight: bold;
       transition: background-color 0.1s, color 0.1s;
       background-color: var(--accent-color);
-      color: #000; /* Black text */
+      color: #000;
     }
     #resetButton.nb-border.nb-shadow:hover {
-      background-color: #3074fa; /* Darker blue */
-      color: #000; /* Ensure black text on hover */
+      background-color: #3074fa;
+      color: #000;
     }
-    button.active { /* style for active hide/show button */
+    button.active {
       background-color: #333;
       color: #fff;
     }
@@ -220,8 +217,8 @@
       height: 80vh;
       max-width: 1600px;
       gap: 15px;
-      align-items: flex-start;
-      margin-top: 10px;
+      align-items: center;
+      margin-top: 5px;
     }
 
     #input-stack {
@@ -296,25 +293,25 @@
       position: absolute;
       bottom: 10px;
       right: 10px;
-      z-index: 101; /* ensure container is above controls background */
+      z-index: 101;
     }
     #infoButton {
       background-color: var(--controls-bg);
-      color: #000; /* Black text */
+      color: #000;
       border: var(--container-border-width) solid var(--border-color);
       border-radius: 50%;
       width: 24px;
       height: 24px;
       font-size: 14px;
       font-weight: bold;
-      line-height: 20px; /* centers '?' vertically */
+      line-height: 20px;
       text-align: center;
       cursor: pointer;
       padding: 0;
     }
     #infoButton.nb-border.nb-shadow:hover {
       background-color: var(--accent-color);
-      color: #000; /* Black text */
+      color: #000;
     }
 
     #infoDropdown {
@@ -352,9 +349,9 @@
     footer {
         text-align: center;
         padding: 15px 0;
-        margin-top: 20px; /* Add some space above the footer */
+        margin-top: 20px;
         font-size: 0.9em;
-        color: #555; /* Subdued text color */
+        color: #555;
     }
 
     footer p {
@@ -362,24 +359,23 @@
     }
 
     footer a {
-        color: var(--accent-color); /* Use accent color for links */
+        color: var(--accent-color);
         text-decoration: none;
-        margin: 0 8px; /* Keep spacing */
+        margin: 0 8px;
     }
 
     footer a:hover {
         text-decoration: underline;
     }
 
-    /* Footer Link Button Styles */
+    /* footer link button styles */
     .footer-link-button {
-        display: inline-block; /* Behave like buttons */
-        padding: 4px 10px; /* Adjust padding */
-        margin: 0 5px; /* Space out buttons */
-        text-decoration: none; /* Remove underline */
-        font-weight: bold; /* Match body bold */
+        display: inline-block;
+        padding: 4px 10px;
+        margin: 0 5px;
+        text-decoration: none;
+        font-weight: bold;
         transition: background-color 0.1s;
-        /* Inherits border/shadow from nb-border/nb-shadow classes */
     }
 
     .github-link {
@@ -387,8 +383,8 @@
         color: #ffffff;
     }
     .github-link:hover {
-        background-color: #5a447a; /* Darker purple */
-        color: #ffffff; /* Ensure text stays white */
+        background-color: #5a447a;
+        color: #ffffff;
     }
 
     .linkedin-link {
@@ -396,23 +392,28 @@
         color: #ffffff;
     }
     .linkedin-link:hover {
-        background-color: #0854a0; /* Darker blue */
-        color: #ffffff; /* Ensure text stays white */
+        background-color: #0854a0;
+        color: #ffffff;
     }
 
-    /* Hide Average Button Style (Default) */
     #hideAvgButton.nb-border.nb-shadow {
-        /* Add default styles similar to reset button */
         padding: 6px 12px; cursor: pointer;
         font-size: 0.8em; font-weight: bold;
         transition: background-color 0.1s, color 0.1s, filter 0.1s;
-        background-color: #ffa500; /* Orange */
-        color: #000; /* Black text */
-        /* Border/shadow from classes */
+        background-color: #ffa500;
+        color: #000;
     }
     #hideAvgButton.nb-border.nb-shadow:hover {
-        background-color: #e69500; /* Darker orange */
-        color: #000; /* Ensure black text on hover */
+        background-color: #e69500;
+        color: #000;
+    }
+
+    /* --- wide screen margin override --- */
+    @media (min-width: 1301px) {
+        #content-wrapper {
+            margin-top: -20px;
+            margin-bottom: -20px;
+        }
     }
 
   </style>
@@ -480,7 +481,7 @@
       </div>
     </div>
 
-    <div id="main-container" class="nb-border nb-shadow">
+    <div id="main-container" class="nb-border nb-shadow-lg">
       <div id="container">
         <div id="loading" class="loading">init...</div>
       </div>
@@ -639,7 +640,7 @@
         } else { console.warn("init: scene not found during clearing."); }
         particles = [];
 
-        // Determine initial geometry based on grid size
+        // determine initial geometry based on grid size
         const initialGeometry = (gridSize > 40) ? veryLowDetailGeometry : lowDetailGeometry;
 
         console.log("init: initializing grids...");
@@ -663,7 +664,7 @@
               });
               if (!initialGeometry) throw new Error("initialGeometry could not be determined or is not defined");
 
-              // Use the determined initial geometry
+              // use the determined initial geometry
               const mesh = new THREE.Mesh(initialGeometry, material);
               const randomDisplacement = () => (Math.random() - 0.5) * 2 * amorphousDisplacementFactor;
               mesh.position.set( offset + i * spacing + randomDisplacement(), offset + j * spacing + randomDisplacement() + yShift, offset + k * spacing + randomDisplacement() );
@@ -721,19 +722,19 @@
       try {
         let minM=Infinity, maxM=-Infinity; const allM=[]; for(let i=0;i<gridSize;i++)for(let j=0;j<gridSize;j++)for(let k=0;k<gridSize;k++){const m=mobilityGrid[i][j][k];allM.push(m);minM=Math.min(minM,m);maxM=Math.max(maxM,m);} const range=maxM-minM; const sortedM=[...allM].sort((a,b)=>a-b); const cnt=particles.length; const cutL=Math.floor(cnt*highlightFraction); const cutH=Math.ceil(cnt*(1.0-highlightFraction)); highlightThresholdLow=sortedM[Math.min(cutL,cnt-1)]; highlightThresholdHigh=sortedM[Math.max(0,cutH-1)]; const compL=highlightThresholdLow+1e-9; const compH=highlightThresholdHigh-1e-9;
 
-        // --- Grid Size Check for Geometry --- 
+        // --- grid size check for geometry --- 
         if (gridSize > 40) {
-          // Grid is large: Use VERY LOW detail for ALL particles
+          // grid is large: use very low detail for all particles
           if (!veryLowDetailGeometry) throw new Error("veryLowDetailGeometry not defined");
           particles.forEach(p => {
             if (!p || !p.mesh || !p.material) return;
 
-            // Set geometry if needed
+            // set geometry if needed
             if (p.mesh.geometry !== veryLowDetailGeometry) {
               p.mesh.geometry = veryLowDetailGeometry;
             }
 
-            // Set visuals based on highlight status (color, opacity, scale, visibility)
+            // set visuals based on highlight status (color, opacity, scale, visibility)
             const currentMobility = mobilityGrid[p.i][p.j][p.k];
             let normM = (range > 1e-6) ? (currentMobility - minM) / range : 0.5;
             p.targetColor.copy(getCoolwarmColor(normM));
@@ -745,7 +746,7 @@
             p.mesh.visible = isHighlighted ? true : !hideAverageParticles;
           });
         } else {
-          // Grid is smaller: Use existing High/Low detail logic
+          // grid is smaller: use existing high/low detail logic
           if (!highDetailGeometry || !lowDetailGeometry) throw new Error("high/low detail geometry not defined");
           particles.forEach(p => {
             if (!p || !p.mesh || !p.material) return;
@@ -755,13 +756,13 @@
 
             let isHighlighted = (currentMobility <= compL) || (currentMobility >= compH);
 
-            // --- Swap Geometry based on highlighted state (HIGH/LOW) ---
+            // --- swap geometry based on highlighted state (high/low) ---
             const targetGeometry = isHighlighted ? highDetailGeometry : lowDetailGeometry;
             if (p.mesh.geometry !== targetGeometry) {
               p.mesh.geometry = targetGeometry;
             }
 
-            // --- Set Visuals ---
+            // --- set visuals ---
             p.material.opacity = isHighlighted ? 1.0 : alphaLow;
             const scale = isHighlighted ? scaleLarge : scaleNormal;
             p.mesh.scale.set(scale, scale, scale);
@@ -862,15 +863,15 @@
         const gridSizeInput=document.getElementById('gridSizeInput'); if(gridSizeInput)gridSizeInput.addEventListener('change',updateGridSize); else console.warn("no grid size input");
         window.addEventListener('resize',onWindowResize,false);
 
-        // Listener for the info button
+        // listener for the info button
         const infoButton = document.getElementById('infoButton');
         if (infoButton) infoButton.addEventListener('click', toggleInfoDropdown);
 
-        // Listener to close dropdown when clicking outside
+        // listener to close dropdown when clicking outside
         document.addEventListener('click', function(event) {
           const dropdown = document.getElementById('infoDropdown');
           const button = document.getElementById('infoButton');
-          // If dropdown is visible and the click was outside the dropdown and outside the button
+          // if dropdown is visible and the click was outside the dropdown and outside the button
           if (dropdown && dropdown.classList.contains('visible') && button && !button.contains(event.target) && !dropdown.contains(event.target)) {
             dropdown.classList.remove('visible');
           }
